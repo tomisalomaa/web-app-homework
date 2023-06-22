@@ -1,4 +1,4 @@
-namespace Homework.Web.Tests;
+namespace Homework.Web.Tests.UnitTests.Controllers;
 
 public class Tests
 {
