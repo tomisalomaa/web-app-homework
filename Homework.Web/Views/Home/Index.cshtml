@@ -1,7 +1,50 @@
-﻿@{
+﻿@model Homework.Web.Models.ProductModel
+
+@{
     ViewData["Title"] = "Products listing";
 }
 
 <div class="text-center">
     <h1 class="page-title">Products</h1>
+    <div class="product-view-utilities-container">
+        <div class="trending-product-container">
+            <strong>Trending product:</strong>
+                @if (Model.Products != null)
+                {
+                    <span id="trending-product">@Model.Products.OrderBy(product => product.Rating).Where(product => product.DiscountPercentage>=10).Select(product => product.Title).First()</span>
+                }
+                else
+                {
+                    <span id="trending-product-error">Unable to fetch trending products...</span>
+                }
+        </div>
+        <div class="product-search-container">
+            <input type="text" id="product-search-box" name="ProductFilterString" placeholder="Search..." />
+        </div>
+    </div>
+    @if (Model.Products != null)
+    {
+        <div class="product-listing-cards">
+            @foreach (var product in Model.Products.Where(product => product.DiscountPercentage >= 10).Select((item, index) => new { index, item }))
+            {
+                <div class="product-card">
+                    <div class="product-card-text-container">
+                        <div class="card-text-title">
+                            <span id="product-@product.index-title">@product.item.Title</span>
+                        </div>
+                        <div class="card-text-info">
+                            <span id="product-@product.index-brand">@product.item.Brand</span>
+                            <span id="product-@product.index-price">@product.item.Price</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-products-available">
+            <span id="no-products-available-message">Uh oh... It looks like we are unable to offer products at the moment!</span>
+        </div>
+    }
 </div>

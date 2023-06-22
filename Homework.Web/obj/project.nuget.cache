@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "NWM+sxpiLrpmx31sRbAMwSQC4Y5v3D5ZJ97CyHZxOCqWG0T+ZXghIlDZFiVq9U6wkcm5FdXs7eCZl7zjQPFFHA==",
+  "dgSpecHash": "blqyDeUE91xfkLOb46yJYArVMb1o1/WP2GGZH+VF1vwiVf+V2HNsm2CoCKSZngx8sZqs3tB7pU9w/aMO5GzbQA==",
   "success": true,
   "projectFilePath": "D:\\koodi\\if-homework\\Homework.Web\\Homework.Web.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\TSa\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
   "logs": []
 }
