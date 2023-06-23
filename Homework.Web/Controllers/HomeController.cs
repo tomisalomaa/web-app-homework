@@ -18,7 +18,7 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        return View(await PopulateProductModel());
+        return View(await CreateProductModel());
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -27,34 +27,28 @@ public class HomeController : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    private async Task<ProductModel> PopulateProductModel()
+    private async Task<ProductModel> CreateProductModel()
     {
-        var message = CreateJsonRequestMessage("https://dummyjson.com/products?limit=0");
-        var httpClient = _httpClientFactory.CreateClient();
-        var response = await httpClient.SendAsync(message);
+        HttpResponseMessage productApiJsonResponse = RequestJsonResponseMessage("https://dummyjson.com/products?limit=0");
         var productModel = new ProductModel();
 
-        // This I would like to see extracted somehow for easier unit testing.
-        // Also, should we try-catch? Should probably consider exception for this call in some way.
-        // Not sure if else returning a null Product model is ideal either, since how do we separate
-        // non-success codes from success codes without debugging?
-        // TODO: potential refactor
-        if (response.IsSuccessStatusCode)
+        if (productApiJsonResponse.IsSuccessStatusCode)
         {
-            var responseStream = await response.Content.ReadAsStringAsync();
+            var responseStream = await productApiJsonResponse.Content.ReadAsStringAsync();
             productModel = JsonConvert.DeserializeObject<ProductModel>(responseStream);
         }
 
         return productModel;
     }
 
-    private HttpRequestMessage CreateJsonRequestMessage(string url)
+    private HttpResponseMessage RequestJsonResponseMessage(string endpoint)
     {
         var message = new HttpRequestMessage();
         message.Method = HttpMethod.Get;
-        message.RequestUri = new Uri(url);
+        message.RequestUri = new Uri(endpoint);
         message.Headers.Add("Accept", "application/json");
+        var httpClient = _httpClientFactory.CreateClient();
 
-        return message;
+        return httpClient.SendAsync(message).Result;
     }
 }
