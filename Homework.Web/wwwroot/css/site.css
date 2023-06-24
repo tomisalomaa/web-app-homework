@@ -28,8 +28,21 @@ body {
     border-style: solid;
 }
 
-@media (min-width:768px) {
+.product-card-text-container {
+    padding: 0.5rem;
+}
 
+.card-text-title {
+    text-align: left;
+    font-weight: bold;
+}
+
+.card-text-info {
+    display: flex;
+    justify-content: space-between;
+}
+
+@media (min-width:768px) {
     .page-title {
         text-align: left;
     }
