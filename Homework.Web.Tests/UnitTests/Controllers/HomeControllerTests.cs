@@ -3,8 +3,6 @@ using Homework.Web.Controllers;
 using Moq;
 using Microsoft.Extensions.Logging;
 using Homework.Web.Services;
-using Homework.Web.Tests.UnitTests.Support.Fake;
-using Newtonsoft.Json;
 using Homework.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Homework.Web.Tests.UnitTests.Support.Stubs;
@@ -23,11 +21,41 @@ public class HomeControllerTests
     [Test]
     public async Task Index_ModelPopulatedSuccessfully_ViewReturnsCorrectView()
     {
-        var fakeProducts = new ProductsFake()
-        {
-            Products = new List<ProductFake> { new ProductFake() }
-        };
         var mockResponse = HttpResponseStub.SingleProductResponseOk();
+        var mockHttpMessageHandler = HttpResponseStub.MockMessageHandlerWithResponse(mockResponse);
+        var mockClient = new HttpClient(mockHttpMessageHandler.Object);
+        var mockClientFactory = HttpResponseStub.CreateMockClientFactory(mockClient);
+        var fakeConfiguration = new AppConfigurationFake();
+        IConfiguration configuration = fakeConfiguration.CreateInMemoryProductEndpointConfiguration();
+
+        var sut = new HomeController(_mockLogger.Object, new ProductService(mockClientFactory.Object, configuration));
+
+        var viewResult = await sut.Index() as ViewResult;
+
+        Assert.That(viewResult.Model, Is.InstanceOf<ProductModel>());
+    }
+
+    [Test]
+    public async Task Index_ClientErrorWhilePopulatingModel_ViewReturnsCorrectView()
+    {
+        var mockResponse = HttpResponseStub.ClientErrorResponse();
+        var mockHttpMessageHandler = HttpResponseStub.MockMessageHandlerWithResponse(mockResponse);
+        var mockClient = new HttpClient(mockHttpMessageHandler.Object);
+        var mockClientFactory = HttpResponseStub.CreateMockClientFactory(mockClient);
+        var fakeConfiguration = new AppConfigurationFake();
+        IConfiguration configuration = fakeConfiguration.CreateInMemoryProductEndpointConfiguration();
+
+        var sut = new HomeController(_mockLogger.Object, new ProductService(mockClientFactory.Object, configuration));
+
+        var viewResult = await sut.Index() as ViewResult;
+
+        Assert.That(viewResult.Model, Is.InstanceOf<ProductModel>());
+    }
+
+    [Test]
+    public async Task Index_ServerErrorWhilePopulatingModel_ViewReturnsCorrectView()
+    {
+        var mockResponse = HttpResponseStub.ServerErrorResponse();
         var mockHttpMessageHandler = HttpResponseStub.MockMessageHandlerWithResponse(mockResponse);
         var mockClient = new HttpClient(mockHttpMessageHandler.Object);
         var mockClientFactory = HttpResponseStub.CreateMockClientFactory(mockClient);
