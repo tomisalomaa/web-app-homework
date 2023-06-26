@@ -11,10 +11,10 @@ public class HomeController : Controller
     private readonly ILogger<HomeController> _logger;
     private readonly ProductService _productService;
 
-    public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory)
+    public HomeController(ILogger<HomeController> logger, ProductService productService)
     {
         _logger = logger;
-        _productService = new ProductService(httpClientFactory);
+        _productService = productService;
     }
 
     public async Task<IActionResult> Index()
@@ -30,15 +30,13 @@ public class HomeController : Controller
 
     private async Task<ProductModel> CreateProductModel()
     {
-        HttpResponseMessage productApiJsonResponse = _productService.GetAllProductsJson();
-        var productModel = new ProductModel();
+        var productApiResponse = await _productService.GetAllProducts();
 
-        if (productApiJsonResponse.IsSuccessStatusCode)
+        if (productApiResponse.IsSuccessStatusCode)
         {
-            var responseStream = await productApiJsonResponse.Content.ReadAsStringAsync();
-            productModel = JsonConvert.DeserializeObject<ProductModel>(responseStream);
+            return JsonConvert.DeserializeObject<ProductModel>(await productApiResponse.Content.ReadAsStringAsync());
         }
 
-        return productModel;
+        return new ProductModel();
     }
 }
