@@ -1,44 +1,43 @@
 namespace Homework.Web.Tests.UnitTests.Controllers;
 using Homework.Web.Controllers;
-using System.Net;
 using Moq;
-using Moq.Protected;
 using Microsoft.Extensions.Logging;
+using Homework.Web.Services;
+using Homework.Web.Tests.UnitTests.Support.Fake;
+using Newtonsoft.Json;
+using Homework.Web.Models;
+using Microsoft.AspNetCore.Mvc;
+using Homework.Web.Tests.UnitTests.Support.Stubs;
 
 public class HomeControllerTests
 {
-    private HomeController _sut;
-    private readonly Mock<ILogger<HomeController>> _mockLogger;
+    private Mock<ILogger<HomeController>> _mockLogger;
 
     public HomeControllerTests()
     {
         _mockLogger = new Mock<ILogger<HomeController>>();
     }
 
-    [SetUp]
-    public void Setup()
+    [Test]
+    public async Task Index_ModelPopulatedSuccessfully_ViewReturnsCorrectView()
     {
-        // handler will always return 200 OK and no response body
-        var mockHandler = new Mock<DelegatingHandler>();
-        mockHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK))
-            .Verifiable();
-        mockHandler.As<IDisposable>().Setup(s => s.Dispose());
+        var fakeProducts = new ProductsFake()
+        {
+            Products = new List<ProductFake> { new ProductFake() }
+        };
+        var expectedResponse = JsonConvert.SerializeObject(fakeProducts);
+        var mockResponse = HttpResponse.SingleProductResponseOk();
+        var mockHttpMessageHandler = HttpResponse.MockMessageHandlerWithResponse(mockResponse);
+        var mockClient = new HttpClient(mockHttpMessageHandler.Object);
+        var mockClientFactory = new Mock<IHttpClientFactory>();
+        mockClientFactory
+            .Setup(factory => factory.CreateClient(It.IsAny<string>()))
+            .Returns(mockClient);
 
-        var httpClient = new HttpClient(mockHandler.Object);
+        var sut = new HomeController(_mockLogger.Object, new ProductService(mockClientFactory.Object));
 
-        // create mock factory using the above client
-        var mockFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);
-        mockFactory
-            .Setup(factory => factory.CreateClient(string.Empty))
-            .Returns(httpClient)
-            .Verifiable();
+        var viewResult = await sut.Index() as ViewResult;
 
-        _sut = new HomeController(_mockLogger.Object, mockFactory.Object);
+        Assert.That(viewResult.Model, Is.InstanceOf<ProductModel>());
     }
 }

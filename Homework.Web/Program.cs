@@ -1,8 +1,11 @@
+using Homework.Web.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<ProductService>();
 
 var app = builder.Build();
 
