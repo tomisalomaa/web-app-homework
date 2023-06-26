@@ -56,6 +56,17 @@ namespace Homework.Web.Tests.UnitTests.Support.Stubs
             return mockHttpMessageHandler;
         }
 
+        public static Mock<IHttpClientFactory> CreateMockClientFactory(HttpClient httpClient)
+        {
+            
+            var mockClientFactory = new Mock<IHttpClientFactory>();
+            mockClientFactory
+                .Setup(factory => factory.CreateClient(It.IsAny<string>()))
+                .Returns(httpClient);
+
+            return mockClientFactory;
+        }
+
         private static HttpRequestMessage CreateBaseRequestMessage()
         {
             return new HttpRequestMessage()

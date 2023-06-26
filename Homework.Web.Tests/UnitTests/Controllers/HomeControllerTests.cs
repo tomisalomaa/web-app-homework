@@ -27,14 +27,10 @@ public class HomeControllerTests
         {
             Products = new List<ProductFake> { new ProductFake() }
         };
-        var expectedResponse = JsonConvert.SerializeObject(fakeProducts);
         var mockResponse = HttpResponseStub.SingleProductResponseOk();
         var mockHttpMessageHandler = HttpResponseStub.MockMessageHandlerWithResponse(mockResponse);
         var mockClient = new HttpClient(mockHttpMessageHandler.Object);
-        var mockClientFactory = new Mock<IHttpClientFactory>();
-        mockClientFactory
-            .Setup(factory => factory.CreateClient(It.IsAny<string>()))
-            .Returns(mockClient);
+        var mockClientFactory = HttpResponseStub.CreateMockClientFactory(mockClient);
         var fakeConfiguration = new AppConfigurationFake();
         IConfiguration configuration = fakeConfiguration.CreateInMemoryProductEndpointConfiguration();
 
