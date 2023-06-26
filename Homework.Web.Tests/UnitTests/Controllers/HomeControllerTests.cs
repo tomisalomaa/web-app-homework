@@ -8,6 +8,8 @@ using Newtonsoft.Json;
 using Homework.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Homework.Web.Tests.UnitTests.Support.Stubs;
+using Microsoft.Extensions.Configuration;
+using Homework.Web.Tests.UnitTests.Support.Fakes;
 
 public class HomeControllerTests
 {
@@ -26,15 +28,17 @@ public class HomeControllerTests
             Products = new List<ProductFake> { new ProductFake() }
         };
         var expectedResponse = JsonConvert.SerializeObject(fakeProducts);
-        var mockResponse = HttpResponse.SingleProductResponseOk();
-        var mockHttpMessageHandler = HttpResponse.MockMessageHandlerWithResponse(mockResponse);
+        var mockResponse = HttpResponseStub.SingleProductResponseOk();
+        var mockHttpMessageHandler = HttpResponseStub.MockMessageHandlerWithResponse(mockResponse);
         var mockClient = new HttpClient(mockHttpMessageHandler.Object);
         var mockClientFactory = new Mock<IHttpClientFactory>();
         mockClientFactory
             .Setup(factory => factory.CreateClient(It.IsAny<string>()))
             .Returns(mockClient);
+        var fakeConfiguration = new AppConfigurationFake();
+        IConfiguration configuration = fakeConfiguration.CreateInMemoryProductEndpointConfiguration();
 
-        var sut = new HomeController(_mockLogger.Object, new ProductService(mockClientFactory.Object));
+        var sut = new HomeController(_mockLogger.Object, new ProductService(mockClientFactory.Object, configuration));
 
         var viewResult = await sut.Index() as ViewResult;
 

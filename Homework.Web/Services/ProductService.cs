@@ -5,10 +5,10 @@
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly string _serviceEndpoint;
 
-        public ProductService(IHttpClientFactory httpClientFactory)
+        public ProductService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
-            _serviceEndpoint = "https://dummyjson.com/products";
+            _serviceEndpoint = configuration.GetValue<string>("AppSettings:ProductApiEndpoint");
         }
 
         public async Task<HttpResponseMessage> GetAllProducts()

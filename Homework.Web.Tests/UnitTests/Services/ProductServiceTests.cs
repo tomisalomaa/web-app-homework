@@ -1,6 +1,8 @@
 ﻿using Homework.Web.Services;
 using Homework.Web.Tests.UnitTests.Support.Fake;
+using Homework.Web.Tests.UnitTests.Support.Fakes;
 using Homework.Web.Tests.UnitTests.Support.Stubs;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Newtonsoft.Json;
 
@@ -16,15 +18,17 @@ namespace Homework.Web.Tests.UnitTests.Services
                 Products = new List<ProductFake> { new ProductFake() }
             };
             var expectedResponse = JsonConvert.SerializeObject(fakeProducts);
-            var mockResponse = HttpResponse.SingleProductResponseOk();
-            var mockHttpMessageHandler = HttpResponse.MockMessageHandlerWithResponse(mockResponse);
+            var mockResponse = HttpResponseStub.SingleProductResponseOk();
+            var mockHttpMessageHandler = HttpResponseStub.MockMessageHandlerWithResponse(mockResponse);
             var mockClient = new HttpClient(mockHttpMessageHandler.Object);
             var mockClientFactory = new Mock<IHttpClientFactory>();
             mockClientFactory
                 .Setup(factory => factory.CreateClient(It.IsAny<string>()))
                 .Returns(mockClient);
+            var fakeConfiguration = new AppConfigurationFake();
+            IConfiguration configuration = fakeConfiguration.CreateInMemoryProductEndpointConfiguration();
 
-            var sut = new ProductService(mockClientFactory.Object);
+            var sut = new ProductService(mockClientFactory.Object, configuration);
 
             var resultJson = await sut.GetAllProducts().GetAwaiter().GetResult().Content.ReadAsStringAsync();
 

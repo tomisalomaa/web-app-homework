@@ -3,9 +3,13 @@ using Homework.Web.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ProductService>();
+
+var configuration = builder.Configuration;
+builder.Services.AddSingleton(configuration);
 
 var app = builder.Build();
 
