@@ -1,4 +1,5 @@
 using Homework.Web.Services;
+using Homework.Web.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var configuration = builder.Configuration;
 builder.Services.AddSingleton(configuration);

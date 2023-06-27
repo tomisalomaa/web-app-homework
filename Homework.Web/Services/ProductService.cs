@@ -1,6 +1,8 @@
-﻿namespace Homework.Web.Services
+﻿using Homework.Web.Services.Interfaces;
+
+namespace Homework.Web.Services
 {
-    public class ProductService
+    public class ProductService : IProductService
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly string _serviceEndpoint;
