@@ -3,15 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Homework.Web.Models;
 using Homework.Web.Services;
+using Homework.Web.Services.Interfaces;
 
 namespace Homework.Web.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly ProductService _productService;
+    private readonly IProductService _productService;
 
-    public HomeController(ILogger<HomeController> logger, ProductService productService)
+    public HomeController(ILogger<HomeController> logger, IProductService productService)
     {
         _logger = logger;
         _productService = productService;
