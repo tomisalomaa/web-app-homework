@@ -34,7 +34,8 @@ public class HomeController : Controller
 
         if (productApiResponse.IsSuccessStatusCode)
         {
-            return JsonConvert.DeserializeObject<ProductModel>(await productApiResponse.Content.ReadAsStringAsync());
+            var content = await productApiResponse.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<ProductModel>(content);
         }
 
         return new ProductModel();
