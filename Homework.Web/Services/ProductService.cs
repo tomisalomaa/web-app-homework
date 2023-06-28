@@ -1,4 +1,6 @@
-﻿using Homework.Web.Services.Interfaces;
+﻿using Homework.Web.Data;
+using Homework.Web.Services.Interfaces;
+using Newtonsoft.Json;
 
 namespace Homework.Web.Services
 {
@@ -13,8 +15,10 @@ namespace Homework.Web.Services
             _serviceEndpoint = configuration.GetValue<string>("AppSettings:ProductApiEndpoint");
         }
 
-        public async Task<HttpResponseMessage> GetAllProducts()
+        public async Task<ProductDto> GetAllProductsAsync()
         {
+            ProductDto productDto = new();
+
             using (var httpClient = _httpClientFactory.CreateClient())
             {
                 var message = new HttpRequestMessage
@@ -23,9 +27,16 @@ namespace Homework.Web.Services
                     RequestUri = new Uri($"{_serviceEndpoint}?limit=0")
                 };
                 message.Headers.Add("Accept", "application/json");
-
-                return await httpClient.SendAsync(message);
+                var response = await httpClient.SendAsync(message);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    productDto = JsonConvert.DeserializeObject<ProductDto>(content) ?? productDto;
+                }
             }
+
+            return productDto;
         }
     }
 }

@@ -1,35 +1,70 @@
-﻿using Homework.Web.Services;
+﻿using Homework.Web.Controllers;
+using Homework.Web.Data;
+using Homework.Web.Models;
+using Homework.Web.Services;
+using Homework.Web.Services.Interfaces;
 using Homework.Web.Tests.UnitTests.Support.Fake;
 using Homework.Web.Tests.UnitTests.Support.Fakes;
 using Homework.Web.Tests.UnitTests.Support.Stubs;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
+using System.Net.Http;
+using System.Xml.Serialization;
 
 namespace Homework.Web.Tests.UnitTests.Services
 {
     public class ProductServiceTests
     {
-        [Test]
-        public async Task GetAllProductsJson_ResponseStatusOk_ReturnsExpectedJsonResponse()
+        private readonly IConfiguration _configuration;
+        private readonly HttpResponseMessage _fakeHttpResponseOk;
+
+        public ProductServiceTests()
         {
-            var fakeProducts = new ProductsFake()
-            {
-                Products = new List<ProductFake> { new ProductFake() }
-            };
-            var expectedResponse = JsonConvert.SerializeObject(fakeProducts);
-            var mockResponse = HttpResponseStub.SingleProductResponseOk();
-            var mockHttpMessageHandler = HttpResponseStub.MockMessageHandlerWithResponse(mockResponse);
-            var mockClient = new HttpClient(mockHttpMessageHandler.Object);
-            var mockClientFactory = HttpResponseStub.CreateMockClientFactory(mockClient);
             var fakeConfiguration = new AppConfigurationFake();
-            IConfiguration configuration = fakeConfiguration.CreateInMemoryProductEndpointConfiguration();
+            _configuration = fakeConfiguration.CreateInMemoryProductEndpointConfiguration();
+            _fakeHttpResponseOk = HttpResponseStub.SingleProductResponseOk();
+            _fakeHttpResponseOk.Content = new StringContent(JsonConvert.SerializeObject(new ProductDtoFake()));
+        }
 
-            var sut = new ProductService(mockClientFactory.Object, configuration);
+        [Test]
+        public async Task GetAllProductsAsync_ResponseStatusOk_ReturnsProductDtoWithContent()
+        {
+            var mockHttpMessageHandler = HttpResponseStub.MockMessageHandlerWithResponse(_fakeHttpResponseOk);
+            var mockHttpClient = new Mock<HttpClient>(mockHttpMessageHandler.Object);
+            var mockHttpClientFactory = HttpResponseStub.CreateMockClientFactory(mockHttpClient.Object);
+            var sut = new ProductService(mockHttpClientFactory.Object, _configuration);
 
-            var resultJson = await sut.GetAllProducts().GetAwaiter().GetResult().Content.ReadAsStringAsync();
+            var result = await sut.GetAllProductsAsync();
 
-            Assert.That(resultJson, Is.EqualTo(expectedResponse));
+            Assert.That(result, Is.InstanceOf<ProductDto>());
+            Assert.That(result.Products, Has.Count.GreaterThan(0));
+            Assert.That(result.Products.First().Title, Is.Not.Null.And.Not.Empty);
+        }
+
+        [TestCaseSource(nameof(ErrorResponseCases))]
+        public async Task GetAllProductsAsync_ResponseStatusServerError_ReturnsProductDtoWithoutProductContent(HttpResponseMessage response, string content)
+        {
+            response.Content = new StringContent(content);
+            var mockHttpMessageHandler = HttpResponseStub.MockMessageHandlerWithResponse(response);
+            var mockHttpClient = new Mock<HttpClient>(mockHttpMessageHandler.Object);
+            var mockHttpClientFactory = HttpResponseStub.CreateMockClientFactory(mockHttpClient.Object);
+            var sut = new ProductService(mockHttpClientFactory.Object, _configuration);
+
+            var result = await sut.GetAllProductsAsync();
+
+            Assert.That(result, Is.InstanceOf<ProductDto>());
+            Assert.That(result.Products, Has.Count.EqualTo(0));
+        }
+
+        public static IEnumerable<TestCaseData> ErrorResponseCases
+        {
+            get
+            {
+                yield return new TestCaseData(HttpResponseStub.ClientErrorResponse(), "Bad Request");
+                yield return new TestCaseData(HttpResponseStub.ServerErrorResponse(), "Internal Server Error");
+            }
         }
     }
 }
