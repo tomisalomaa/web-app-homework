@@ -10,16 +10,13 @@ namespace Homework.Web.Tests.UnitTests.Support.Stubs
     {
         public static HttpResponseMessage SingleProductResponseOk()
         {
-            var fakeProducts = new ProductsFake();
-            fakeProducts.Products.Add(new ProductFake());
             var message = CreateBaseRequestMessage();
 
             return new HttpResponseMessage()
             {
                 RequestMessage = message,
                 StatusCode = HttpStatusCode.OK,
-                ReasonPhrase = "OK",
-                Content = new StringContent(JsonConvert.SerializeObject(fakeProducts))
+                ReasonPhrase = "OK"
             };
         }
 

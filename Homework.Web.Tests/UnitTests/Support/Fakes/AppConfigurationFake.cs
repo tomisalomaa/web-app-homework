@@ -5,7 +5,7 @@ namespace Homework.Web.Tests.UnitTests.Support.Fakes
 {
     public class AppConfigurationFake
     {
-        public IConfiguration CreateInMemoryCollection(Dictionary<string, string> appsettings)
+        public static IConfiguration CreateInMemoryCollection(Dictionary<string, string> appsettings)
         {
             IConfiguration configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(appsettings)

@@ -1,7 +1,9 @@
-﻿namespace Homework.Web.Services.Interfaces
+﻿using Homework.Web.Data;
+
+namespace Homework.Web.Services.Interfaces
 {
     public interface IProductService
     {
-        Task<HttpResponseMessage> GetAllProducts();
+        Task<ProductDto> GetAllProductsAsync();
     }
 }
