@@ -1,0 +1,13 @@
+﻿@model ProductsViewModel
+
+<div class="trending-product-container">
+    <strong>Trending product:</strong>
+    @if (!string.IsNullOrEmpty(Model.TrendingProduct))
+    {
+        <span id="trending-product">@Model.TrendingProduct</span>
+    }
+    else
+    {
+        <span id="trending-product-error">Unable to show trending product</span>
+    }
+</div>

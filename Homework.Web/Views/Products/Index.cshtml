@@ -7,17 +7,7 @@
 <div class="text-center">
     <h1 class="page-title">Products</h1>
     <div class="product-view-utilities-container">
-        <div class="trending-product-container">
-            <strong>Trending product:</strong>
-                @if (!string.IsNullOrEmpty(Model.TrendingProduct))
-                {
-                    <span id="trending-product">@Model.TrendingProduct</span>
-                }
-                else
-                {
-                    <span id="trending-product-error">Unable to show trending product</span>
-                }
-        </div>
+        @await Html.PartialAsync("_TrendingProduct", Model)
         <div class="product-search-container">
             <input type="text" id="product-search-box" name="ProductFilterString" placeholder="Search..." />
         </div>
@@ -27,17 +17,7 @@
         <div class="product-listing-cards">
             @foreach (var product in Model.Products)
             {
-                <div class="product-card">
-                    <div class="product-card-text-container">
-                        <div class="card-text-title">
-                            <span>@product.Title</span>
-                        </div>
-                        <div class="card-text-info">
-                            <span>@product.Brand</span>
-                            <span>@product.Price @product.Currency</span>
-                        </div>
-                    </div>
-                </div>
+                @await Html.PartialAsync("_ProductCard", product)
             }
         </div>
     }
